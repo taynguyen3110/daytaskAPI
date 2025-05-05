@@ -15,7 +15,7 @@ namespace TaskFlow.Services
     {
         public async Task<TokenResponseDto?> LoginAsync(UserDto request)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user is null)
             {
                 return null;
@@ -37,7 +37,7 @@ namespace TaskFlow.Services
             };
         }
 
-        public async Task<User?> RegisterAsync(UserDto request)
+        public async Task<User?> RegisterAsync(RegisterRequestDto request)
         {
             if (await context.Users.AnyAsync(u => u.Email == request.Email))
             {

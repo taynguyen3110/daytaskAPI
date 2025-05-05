@@ -5,7 +5,7 @@ namespace TaskFlow.Services
 {
     public interface IAuthService
     {
-        Task<User?> RegisterAsync(UserDto request);
+        Task<User?> RegisterAsync(RegisterRequestDto request);
         Task<TokenResponseDto?> LoginAsync(UserDto request);
         Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request);
     }   

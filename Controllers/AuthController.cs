@@ -19,7 +19,7 @@ namespace TaskFlow.Controllers
         public static User user = new();
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserDto request)
+        public async Task<ActionResult<User>> Register(RegisterRequestDto request)
         {
             var user = await authService.RegisterAsync(request);
             if (user is null)
