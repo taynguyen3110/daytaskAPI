@@ -1,13 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 using TaskFlow.Dtos;
-using TaskFlow.Models;
 using TaskFlow.Services;
 
 namespace TaskFlow.Controllers
@@ -16,25 +9,23 @@ namespace TaskFlow.Controllers
     [ApiController]
     public class AuthController(IAuthService authService) : ControllerBase
     {
-        public static User user = new();
-
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(RegisterRequestDto request)
+        public async Task<ActionResult<RegisterResponseDto>> Register(RegisterRequestDto request)
         {
-            var user = await authService.RegisterAsync(request);
-            if (user is null)
+            var response = await authService.RegisterAsync(request);
+            if (!response.Success)
             {
-                return BadRequest("Username already exists.");
+                return BadRequest(response);
             }
-            return Ok(user);
+            return Ok(response);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<TokenResponseDto>> Login(UserDto request)
+        public async Task<ActionResult<LoginResponseDto>> Login(UserDto request)
         {
            var result = await authService.LoginAsync(request);
-            if (result is null)
-                return BadRequest("Invalid username or password.");
+            if (!string.IsNullOrEmpty(result.Message))
+                return BadRequest(result);
 
             return Ok(result);
         }
@@ -53,13 +44,6 @@ namespace TaskFlow.Controllers
         public IActionResult AuthenticatedOnlyEndpoint()
         {
             return Ok("You are auth!");
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpGet("admin")]
-        public IActionResult AdminOnlyEndpoint()
-        {
-            return Ok("You are admin!");
         }
     }
 }

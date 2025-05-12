@@ -13,18 +13,37 @@ namespace TaskFlow.Services
 {
     public class AuthService(AppDbContext context, IConfiguration configuration) : IAuthService
     {
-        public async Task<TokenResponseDto?> LoginAsync(UserDto request)
+        public async Task<LoginResponseDto> LoginAsync(UserDto request)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            LoginResponseDto response = new(); 
+
             if (user is null)
             {
-                return null;
+                response.IsAuthenticated = false;
+                response.Message = "Invalid username or password.";
+                return response;
             }
             if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
             {
-                return null;
+                response.IsAuthenticated = false;
+                response.Message = "Invalid username or password.";
+                return response;
             }
-            TokenResponseDto response = await CreateTokenResponse(user);
+            TokenResponseDto token = await CreateTokenResponse(user);
+            
+            UserLoginDto loggedInUser = new()
+            {
+                Id = user.Id.ToString(),
+                Username = user.Username,
+                Email = user.Email,
+            };
+
+            response.IsAuthenticated = true;
+            response.Token = token;
+            response.User = loggedInUser;
+
             return response;
         }
 
@@ -37,12 +56,21 @@ namespace TaskFlow.Services
             };
         }
 
-        public async Task<User?> RegisterAsync(RegisterRequestDto request)
+        public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
         {
+            RegisterResponseDto response = new()
+            {
+                Success = false,
+                Message = ""
+            };
+
             if (await context.Users.AnyAsync(u => u.Email == request.Email))
             {
-                return null;
+                response.Message = "Email already registered";
+                return response;
             }
+
+            //Create and save user
             var user = new User();
             var hashedPassword = new PasswordHasher<User>()
           .HashPassword(user, request.Password);
@@ -54,7 +82,9 @@ namespace TaskFlow.Services
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            return user;
+            response.Success = true;
+            response.Message = "Register successfully";
+            return response;
         }
 
         public async Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request)
@@ -100,7 +130,6 @@ namespace TaskFlow.Services
              {
                  new Claim(ClaimTypes.Name, user.Username),
                  new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                 new Claim(ClaimTypes.Role, user.Role)
              };
 
             var key = new SymmetricSecurityKey(
