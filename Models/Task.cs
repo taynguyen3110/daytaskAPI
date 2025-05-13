@@ -15,7 +15,7 @@ namespace TaskFlow.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
         public string Recurrence { get; set; } = string.Empty;
-        public string Reminder { get; set; } = string.Empty;
+        public DateTime Reminder { get; set; }
         public string SnoozedUntil { get; set; } = string.Empty;
         public Guid UserId { get; set; }
     }

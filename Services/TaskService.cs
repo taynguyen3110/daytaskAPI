@@ -26,7 +26,6 @@ namespace TaskFlow.Services
                 Labels = taskDto.Labels,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                CompletedAt = taskDto.CompletedAt,
                 Recurrence = taskDto.Recurrence,
                 Reminder = taskDto.Reminder,
                 SnoozedUntil = taskDto.SnoozedUntil,

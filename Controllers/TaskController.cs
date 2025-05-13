@@ -17,7 +17,7 @@ namespace TaskFlow.Controllers
             var response = await taskService.GetAllTasksAsync();
             if (response == null || !response.Any())
             {
-                return BadRequest("No tasks found.");
+                return NotFound("No tasks found.");
             }
             return Ok(response);
         }
