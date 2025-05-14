@@ -1,6 +1,4 @@
-﻿using System.Reflection.Emit;
-
-namespace TaskFlow.Models
+﻿namespace TaskFlow.Models
 {
     public class Task
     {
@@ -11,9 +9,9 @@ namespace TaskFlow.Models
         public DateTime DueDate { get; set; }
         public string Priority { get; set; } = "low";  //low, medium, high
         public string[] Labels { get; set; } = Array.Empty<string>();
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime CompletedAt { get; set; }
         public string Recurrence { get; set; } = string.Empty;
         public DateTime Reminder { get; set; }
         public string SnoozedUntil { get; set; } = string.Empty;
