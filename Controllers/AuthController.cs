@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Dtos;
-using TaskFlow.Services;
+using daytask.Dtos;
+using daytask.Services;
 
-namespace TaskFlow.Controllers
+namespace daytask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

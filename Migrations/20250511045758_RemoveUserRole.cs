@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TaskFlow.Migrations
+namespace daytask.Migrations
 {
     /// <inheritdoc />
     public partial class RemoveUserRole : Migration

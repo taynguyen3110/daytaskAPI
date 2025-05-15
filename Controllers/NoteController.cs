@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Dtos;
-using TaskFlow.Models;
-using TaskFlow.Services;
+using daytask.Dtos;
+using daytask.Models;
+using daytask.Services;
 
-namespace TaskFlow.Controllers
+namespace daytask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -63,14 +63,14 @@ namespace TaskFlow.Controllers
         }
 
         [HttpDelete("id")]
-        public async Task<IActionResult> DeleteNote(Guid id)
+        public async Task<ActionResult<Boolean>> DeleteNote(Guid id)
         {
             var result = await noteService.DeleteNoteAsync(id);
             if (!result)
             {
-                return NotFound("Failed to delete note.");
+                return NotFound("Note not found.");
             }
-            return NoContent();
+            return Ok(result);
         }
     }
 }

@@ -5,7 +5,7 @@
 namespace daytask.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRefreshToken1 : Migration
+    public partial class Rebrand : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

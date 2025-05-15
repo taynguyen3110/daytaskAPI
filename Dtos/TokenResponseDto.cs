@@ -1,6 +1,6 @@
 ﻿using Microsoft.Identity.Client;
 
-namespace TaskFlow.Dtos
+namespace daytask.Dtos
 {
     public class TokenResponseDto
     {

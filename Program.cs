@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
-using TaskFlow.Data;
-using TaskFlow.Services;
+using daytask.Data;
+using daytask.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +51,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<INoteService, NoteService>();
 
 var app = builder.Build();
 

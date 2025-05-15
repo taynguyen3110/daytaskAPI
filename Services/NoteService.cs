@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TaskFlow.Data;
-using TaskFlow.Dtos;
-using TaskFlow.Models;
+using daytask.Data;
+using daytask.Dtos;
+using daytask.Models;
 
-namespace TaskFlow.Services
+namespace daytask.Services
 {
     public class NoteService : INoteService
     {

@@ -1,4 +1,4 @@
-﻿namespace TaskFlow.Models
+﻿namespace daytask.Models
 {
     public class User
     {

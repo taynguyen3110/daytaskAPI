@@ -12,8 +12,8 @@ using daytask.Data;
 namespace daytask.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250514095140_AddNoteDB")]
-    partial class AddNoteDB
+    [Migration("20250515064445_Rebrand")]
+    partial class Rebrand
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

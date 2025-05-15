@@ -1,6 +1,6 @@
-﻿using TaskFlow.Dtos;
-using TaskFlow.Models;
-using TaskFlow.Data;
+﻿using daytask.Dtos;
+using daytask.Models;
+using daytask.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace TaskFlow.Services
+namespace daytask.Services
 {
     public class AuthService(AppDbContext context, IConfiguration configuration) : IAuthService
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TaskFlow.Models;
+using daytask.Models;
 
-namespace TaskFlow.Data
+namespace daytask.Data
 {
     public class AppDbContext : DbContext
     {

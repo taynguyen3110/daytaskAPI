@@ -1,7 +1,7 @@
-﻿using TaskFlow.Dtos;
-using TaskFlow.Models;
+﻿using daytask.Dtos;
+using daytask.Models;
 
-namespace TaskFlow.Services
+namespace daytask.Services
 {
     public interface INoteService
     {

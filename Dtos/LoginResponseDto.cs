@@ -1,4 +1,4 @@
-﻿namespace TaskFlow.Dtos
+﻿namespace daytask.Dtos
 {
     public class LoginResponseDto
     {

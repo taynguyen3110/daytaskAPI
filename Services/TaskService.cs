@@ -1,10 +1,10 @@
-﻿using TaskFlow.Dtos;
-using TaskFlow.Models;
-using TaskFlow.Data;
+﻿using daytask.Dtos;
+using daytask.Models;
+using daytask.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 
-namespace TaskFlow.Services
+namespace daytask.Services
 {
     public class TaskService : ITaskService
     {

@@ -1,6 +1,6 @@
-﻿using TaskFlow.Dtos;
+﻿using daytask.Dtos;
 
-namespace TaskFlow.Services
+namespace daytask.Services
 {
     public interface ITaskService
     {

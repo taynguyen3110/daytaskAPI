@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TaskFlow.Data;
+using daytask.Data;
 
 #nullable disable
 
-namespace TaskFlow.Migrations
+namespace daytask.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20250513004006_IndexUserIDCol")]
@@ -25,7 +25,7 @@ namespace TaskFlow.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TaskFlow.Models.Task", b =>
+            modelBuilder.Entity("daytask.Models.Task", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -84,7 +84,7 @@ namespace TaskFlow.Migrations
                     b.ToTable("Tasks");
                 });
 
-            modelBuilder.Entity("TaskFlow.Models.User", b =>
+            modelBuilder.Entity("daytask.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

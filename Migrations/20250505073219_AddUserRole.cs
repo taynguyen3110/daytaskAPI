@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace TaskFlow.Migrations
+namespace daytask.Migrations
 {
     /// <inheritdoc />
     public partial class AddUserRole : Migration

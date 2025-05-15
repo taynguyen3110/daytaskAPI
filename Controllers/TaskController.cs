@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Dtos;
-using TaskFlow.Models;
-using TaskFlow.Services;
+using daytask.Dtos;
+using daytask.Models;
+using daytask.Services;
 
-namespace TaskFlow.Controllers
+namespace daytask.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
