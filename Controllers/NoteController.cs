@@ -21,7 +21,7 @@ namespace daytask.Controllers
             return Ok(notes);
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Note>> GetNoteById(Guid id)
         {
             var note = await noteService.GetNoteByIdAsync(id);
@@ -47,7 +47,7 @@ namespace daytask.Controllers
             return CreatedAtAction(nameof(GetNoteById), new { id = createdNote.Id }, createdNote);
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<ActionResult<Note>> UpdateNote(Guid id, [FromBody] NoteRequestDto note)
         {
             if (note == null)
@@ -62,7 +62,7 @@ namespace daytask.Controllers
             return Ok(updatedNote);
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult<Boolean>> DeleteNote(Guid id)
         {
             var result = await noteService.DeleteNoteAsync(id);
