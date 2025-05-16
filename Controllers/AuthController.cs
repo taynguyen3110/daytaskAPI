@@ -9,6 +9,7 @@ namespace daytask.Controllers
     [ApiController]
     public class AuthController(IAuthService authService) : ControllerBase
     {
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<RegisterResponseDto>> Register(RegisterRequestDto request)
         {
@@ -20,6 +21,7 @@ namespace daytask.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponseDto>> Login(UserDto request)
         {
@@ -37,13 +39,6 @@ namespace daytask.Controllers
             if (result is null || result.AccessToken is null || result.RefreshToken is null)
                 return Unauthorized("Invalid refresh token.");
             return Ok(result);
-        }
-
-        [Authorize]
-        [HttpGet]
-        public IActionResult AuthenticatedOnlyEndpoint()
-        {
-            return Ok("You are auth!");
         }
     }
 }
