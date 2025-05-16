@@ -1,21 +1,20 @@
 ﻿using daytask.Dtos;
 using daytask.Models;
-using daytask.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
+using daytask.Repositories;
 
 namespace daytask.Services
 {
-    public class AuthService(AppDbContext context, IConfiguration configuration) : IAuthService
+    public class AuthService(IConfiguration configuration, IUserRepository userRepository) : IAuthService
     {
         public async Task<LoginResponseDto> LoginAsync(UserDto request)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            var user = await userRepository.GetUserByEmailAsync(request.Email);
 
             LoginResponseDto response = new(); 
 
@@ -64,7 +63,7 @@ namespace daytask.Services
                 Message = ""
             };
 
-            if (await context.Users.AnyAsync(u => u.Email == request.Email))
+            if (await userRepository.CheckUserExist(request.Email))
             {
                 response.Message = "Email already registered";
                 return response;
@@ -79,8 +78,7 @@ namespace daytask.Services
             user.Username = request.Username;
             user.PasswordHash = hashedPassword;
 
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
+            await userRepository.AddUserAsync(user);
 
             response.Success = true;
             response.Message = "Register successfully";
@@ -99,7 +97,7 @@ namespace daytask.Services
 
         private async Task<User?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
         {
-            var user = await context.Users.FindAsync(userId);
+            var user = await userRepository.GetUserByIdAsync(userId);
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
                 return null;
@@ -120,7 +118,7 @@ namespace daytask.Services
             var refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            await context.SaveChangesAsync();
+            await userRepository.SaveChangesAsync();
             return refreshToken;
         }
 
