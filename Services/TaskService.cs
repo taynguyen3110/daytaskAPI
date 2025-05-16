@@ -1,18 +1,10 @@
 ﻿using daytask.Dtos;
-using daytask.Models;
-using daytask.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
+using daytask.Repositories;
 
 namespace daytask.Services
 {
-    public class TaskService : ITaskService
+    public class TaskService (ITaskRepository taskRepository) : ITaskService
     {
-        private readonly AppDbContext _dbContext;
-        public TaskService(AppDbContext context)
-        {
-            _dbContext = context;
-        }
         public async Task<TaskResponseDto> CreateTaskAsync(TaskDto taskDto)
         {
             var task = new Models.Task
@@ -32,8 +24,8 @@ namespace daytask.Services
                 UserId = taskDto.UserId
             };
 
-            _dbContext.Tasks.Add(task);
-            await _dbContext.SaveChangesAsync();
+            await taskRepository.CreateTaskAsync(task);
+            await taskRepository.SaveChangesAsync();
 
             return new TaskResponseDto
             {
@@ -55,20 +47,20 @@ namespace daytask.Services
 
         public async Task<bool> DeleteTaskAsync(Guid taskId)
         {
-            var task = await _dbContext.Tasks.FindAsync(taskId);
+            var task = await taskRepository.GetTaskByIdAsync(taskId);
             if (task == null)
             {
                 return false;
             }
-            _dbContext.Tasks.Remove(task);
-            await _dbContext.SaveChangesAsync();
+            taskRepository.RemoveTaskAsync(task);
+            await taskRepository.SaveChangesAsync();
             return true;
         }
 
         public async Task<IEnumerable<TaskResponseDto>> GetAllTasksAsync()
         {
             
-            var tasks = await _dbContext.Tasks.ToListAsync();
+            var tasks = await taskRepository.GetAllTasksAsync();
             return tasks.Select(t => new TaskResponseDto
             {
                 Id = t.Id,
@@ -89,7 +81,7 @@ namespace daytask.Services
 
         public async Task<TaskResponseDto> GetTaskByIdAsync(Guid taskId)
         {
-            var task = await _dbContext.Tasks.FindAsync(taskId);
+            var task = await taskRepository.GetTaskByIdAsync(taskId);
             if (task == null)
             {
                 return null;
@@ -115,9 +107,7 @@ namespace daytask.Services
         public async Task<IEnumerable<TaskResponseDto>> GetTasksByUserIdAsync(Guid userId)
         {
 
-            var tasks = await _dbContext.Tasks
-                .Where(t => t.UserId == userId)
-                .ToListAsync();
+            var tasks = await taskRepository.GetTasksByUserIdAsync(userId);
             return tasks.Select(t => new TaskResponseDto
             {
                 Id = t.Id,
@@ -139,7 +129,7 @@ namespace daytask.Services
          public async Task<TaskResponseDto> UpdateTaskAsync(Guid taskId, TaskDto taskDto)
         {
 
-            var task = await _dbContext.Tasks.FindAsync(taskId);
+            var task = await taskRepository.GetTaskByIdAsync(taskId);
             if (task == null)
             {
                 return null;
@@ -155,7 +145,7 @@ namespace daytask.Services
             task.Reminder = taskDto.Reminder;
             task.SnoozedUntil = taskDto.SnoozedUntil;
 
-            await _dbContext.SaveChangesAsync();
+            await taskRepository.SaveChangesAsync();
 
             return new TaskResponseDto
             {

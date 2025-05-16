@@ -1,17 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using daytask.Data;
-using daytask.Dtos;
+﻿using daytask.Dtos;
 using daytask.Models;
+using daytask.Repositories;
 
 namespace daytask.Services
 {
-    public class NoteService : INoteService
+    public class NoteService (INoteRepository noteRepository) : INoteService
     {
-        private readonly AppDbContext _dbContext;
-        public NoteService(AppDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
         public async Task<Note> CreateNoteAsync(NoteRequestDto note)
         {
             var newNote = new Note()
@@ -22,25 +16,25 @@ namespace daytask.Services
                 UpdatedAt = note.UpdatedAt,
                 UserId = note.UserId
             };
-            _dbContext.Notes.Add(newNote);
-            await _dbContext.SaveChangesAsync();
+            await noteRepository.CreateNoteAsync(newNote);
+            await noteRepository.SaveChangesAsync();
 
             return newNote;
         }
 
         public async Task<bool> DeleteNoteAsync(Guid id)
         {
-            var note = await _dbContext.Notes.FindAsync(id);
+            var note = await noteRepository.GetNoteByIdAsync(id);
             if (note == null)
                 return false;
-            _dbContext.Notes.Remove(note);
-            await _dbContext.SaveChangesAsync();
+            noteRepository.RemoveNote(note);
+            await noteRepository.SaveChangesAsync();
             return true;
         }
 
         public async Task<Note> GetNoteByIdAsync(Guid id)
         {
-            var note = await _dbContext.Notes.FindAsync(id);
+            var note = await noteRepository.GetNoteByIdAsync(id);
             if (note == null)
                 return null;
             return note;
@@ -48,22 +42,19 @@ namespace daytask.Services
 
         public async Task<IEnumerable<Note>> GetNotesByUserIdAsync(Guid userId)
         {
-            var notes = await _dbContext.Notes
-                .Where(n => n.UserId == userId)
-                .ToListAsync();
+            var notes = await noteRepository.GetNotesByUserIdAsync(userId);
             return notes.ToArray();
         }
 
         public async Task<Note> UpdateNoteAsync(Guid id, NoteRequestDto note)
         {
 
-            var existingNote = await _dbContext.Notes.FindAsync(id);
+            var existingNote = await noteRepository.GetNoteByIdAsync(id);
             if (existingNote == null)
                 return null;
             existingNote.Content = note.Content;
             existingNote.UpdatedAt = note.UpdatedAt;
-            _dbContext.Notes.Update(existingNote);
-            await _dbContext.SaveChangesAsync();
+            await noteRepository.SaveChangesAsync();
             return existingNote;
         }
     }
