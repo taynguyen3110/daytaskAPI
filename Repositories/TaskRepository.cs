@@ -1,38 +1,49 @@
 ﻿using daytask.Data;
+using daytask.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace daytask.Repositories
 {
     public class TaskRepository (AppDbContext dbContext) : ITaskRepository
     {
-        public async Task CreateTaskAsync(Models.Task task)
+        public async Task<UserTask?> GetTaskByIdAsync(Guid id)
         {
-            await dbContext.Tasks.AddAsync(task);
+            return await dbContext.Tasks.FindAsync(id);
         }
-        public async Task<Models.Task?> GetTaskByIdAsync(Guid taskId)
-        {
-            return await dbContext.Tasks.FindAsync(taskId);
-        }
-        public async Task<IEnumerable<Models.Task>> GetAllTasksAsync()
+
+        public async Task<IEnumerable<UserTask>> GetAllTasksAsync()
         {
             return await dbContext.Tasks.ToListAsync();
         }
 
-        public async Task<IEnumerable<Models.Task>> GetTasksByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<UserTask>> GetTasksByUserIdAsync(Guid userId)
         {
             return await dbContext.Tasks
                 .Where(t => t.UserId == userId)
                 .ToListAsync();
         }
-        public void RemoveTaskAsync(Models.Task task)
+
+        public async Task<bool> CreateTaskAsync(UserTask task)
+        {
+            await dbContext.Tasks.AddAsync(task);
+            return await SaveChangesAsync();
+        }
+
+        public async Task<bool> UpdateTaskAsync(UserTask task)
+        {
+            dbContext.Tasks.Update(task);
+            return await SaveChangesAsync();
+        }
+
+        public async Task<bool> RemoveTaskAsync(UserTask task)
         {
             dbContext.Tasks.Remove(task);
+            return await SaveChangesAsync();
         }
 
-        public async Task SaveChangesAsync()
+        public async Task<bool> SaveChangesAsync()
         {
-            await dbContext.SaveChangesAsync();
+            return await dbContext.SaveChangesAsync() > 0;
         }
-
     }
 }

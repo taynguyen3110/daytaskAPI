@@ -26,7 +26,7 @@ namespace daytask.Controllers
         public async Task<ActionResult<LoginResponseDto>> Login(UserDto request)
         {
            var result = await authService.LoginAsync(request);
-            if (!string.IsNullOrEmpty(result.Message))
+            if (result.StatusCode != 200)
                 return BadRequest(result);
 
             return Ok(result);
@@ -36,7 +36,7 @@ namespace daytask.Controllers
         public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
         {
             var result = await authService.RefreshTokensAsync(request);
-            if (result is null || result.AccessToken is null || result.RefreshToken is null)
+            if (result is null || result.Data.AccessToken is null || result.Data.RefreshToken is null)
                 return Unauthorized("Invalid refresh token.");
             return Ok(result);
         }

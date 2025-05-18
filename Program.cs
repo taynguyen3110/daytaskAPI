@@ -5,6 +5,12 @@ using Scalar.AspNetCore;
 using System.Text;
 using daytask.Data;
 using daytask.Services;
+using daytask.Repositories;
+using daytask.Validators;
+using daytask.Filters;
+using FluentValidation;
+using daytask.Middleware;
+using daytask.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +20,15 @@ builder.Logging.AddConsole(); // Logs to the console
 builder.Logging.AddDebug(); // Logs to the debug output window (useful in Visual Studio)
 
 // Add services to the container.
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
 
-builder.Services.AddControllers();
+// Register FluentValidation validators
+builder.Services.AddScoped<IValidator<RegisterRequestDto>, RegisterRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<UserDto>, UserDtoValidator>();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -52,6 +65,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<INoteService, NoteService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
 
 var app = builder.Build();
 
@@ -66,6 +82,10 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowSpecificOrigins");
 
+// Add global exception handling middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers()

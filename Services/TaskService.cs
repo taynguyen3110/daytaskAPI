@@ -1,168 +1,97 @@
 ﻿using daytask.Dtos;
+using daytask.Models;
 using daytask.Repositories;
+using daytask.Exceptions;
 
 namespace daytask.Services
 {
     public class TaskService (ITaskRepository taskRepository) : ITaskService
     {
-        public async Task<TaskResponseDto> CreateTaskAsync(TaskDto taskDto)
+        public async Task<ApiResponse<UserTask>> CreateTaskAsync(TaskDto taskDto)
         {
-            var task = new Models.Task
+            var task = new UserTask
             {
-                Id = Guid.NewGuid(),
                 Title = taskDto.Title,
                 Description = taskDto.Description,
-                Completed = taskDto.Completed,
                 DueDate = taskDto.DueDate,
                 Priority = taskDto.Priority,
                 Labels = taskDto.Labels,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                Recurrence = taskDto.Recurrence,
-                Reminder = taskDto.Reminder,
-                SnoozedUntil = taskDto.SnoozedUntil,
                 UserId = taskDto.UserId
             };
 
-            await taskRepository.CreateTaskAsync(task);
-            await taskRepository.SaveChangesAsync();
-
-            return new TaskResponseDto
+            var success = await taskRepository.CreateTaskAsync(task);
+            if (!success)
             {
-                Id = task.Id,
-                Title = task.Title,
-                Description = task.Description,
-                Completed = task.Completed,
-                DueDate = task.DueDate,
-                Priority = task.Priority,
-                Labels = task.Labels,
-                CreatedAt = task.CreatedAt,
-                UpdatedAt = task.UpdatedAt,
-                CompletedAt = task.CompletedAt,
-                Recurrence = task.Recurrence,
-                Reminder = task.Reminder,
-                SnoozedUntil = task.SnoozedUntil
-            };
+                throw new AppException("Failed to create task");
+            }
+
+            return ApiResponse<UserTask>.SuccessResponse(task, "Task created successfully");
         }
 
-        public async Task<bool> DeleteTaskAsync(Guid taskId)
+        public async Task<ApiResponse<bool>> DeleteTaskAsync(Guid id)
         {
-            var task = await taskRepository.GetTaskByIdAsync(taskId);
+            var task = await taskRepository.GetTaskByIdAsync(id);
             if (task == null)
             {
-                return false;
+                throw new NotFoundException($"Task with ID {id} not found");
             }
-            taskRepository.RemoveTaskAsync(task);
-            await taskRepository.SaveChangesAsync();
-            return true;
+
+            var success = await taskRepository.RemoveTaskAsync(task);
+            if (!success)
+            {
+                throw new AppException("Failed to delete task");
+            }
+
+            return ApiResponse<bool>.SuccessResponse(true, "Task deleted successfully");
         }
 
-        public async Task<IEnumerable<TaskResponseDto>> GetAllTasksAsync()
+        public async Task<ApiResponse<IEnumerable<UserTask>>> GetAllTasksAsync()
         {
-            
             var tasks = await taskRepository.GetAllTasksAsync();
-            return tasks.Select(t => new TaskResponseDto
-            {
-                Id = t.Id,
-                Title = t.Title,
-                Description = t.Description,
-                Completed = t.Completed,
-                DueDate = t.DueDate,
-                Priority = t.Priority,
-                Labels = t.Labels,
-                CreatedAt = t.CreatedAt,
-                UpdatedAt = t.UpdatedAt,
-                CompletedAt = t.CompletedAt,
-                Recurrence = t.Recurrence,
-                Reminder = t.Reminder,
-                SnoozedUntil = t.SnoozedUntil,
-            });
+            return ApiResponse<IEnumerable<UserTask>>.SuccessResponse(tasks);
         }
 
-        public async Task<TaskResponseDto> GetTaskByIdAsync(Guid taskId)
+        public async Task<ApiResponse<UserTask>> GetTaskByIdAsync(Guid id)
         {
-            var task = await taskRepository.GetTaskByIdAsync(taskId);
+            var task = await taskRepository.GetTaskByIdAsync(id);
             if (task == null)
             {
-                return null;
+                throw new NotFoundException($"Task with ID {id} not found");
             }
-            return new TaskResponseDto
-            {
-                Id = task.Id,
-                Title = task.Title,
-                Description = task.Description,
-                Completed = task.Completed,
-                DueDate = task.DueDate,
-                Priority = task.Priority,
-                Labels = task.Labels,
-                CreatedAt = task.CreatedAt,
-                UpdatedAt = task.UpdatedAt,
-                CompletedAt = task.CompletedAt,
-                Recurrence = task.Recurrence,
-                Reminder = task.Reminder,
-                SnoozedUntil = task.SnoozedUntil
-            };
+
+            return ApiResponse<UserTask>.SuccessResponse(task);
         }
 
-        public async Task<IEnumerable<TaskResponseDto>> GetTasksByUserIdAsync(Guid userId)
+        public async Task<ApiResponse<IEnumerable<UserTask>>> GetTasksByUserIdAsync(Guid userId)
         {
-
             var tasks = await taskRepository.GetTasksByUserIdAsync(userId);
-            return tasks.Select(t => new TaskResponseDto
-            {
-                Id = t.Id,
-                Title = t.Title,
-                Description = t.Description,
-                Completed = t.Completed,
-                DueDate = t.DueDate,
-                Priority = t.Priority,
-                Labels = t.Labels,
-                CreatedAt = t.CreatedAt,
-                UpdatedAt = t.UpdatedAt,
-                CompletedAt = t.CompletedAt,
-                Recurrence = t.Recurrence,
-                Reminder = t.Reminder,
-                SnoozedUntil = t.SnoozedUntil
-            });
+            return ApiResponse<IEnumerable<UserTask>>.SuccessResponse(tasks);
         }
 
-         public async Task<TaskResponseDto> UpdateTaskAsync(Guid taskId, TaskDto taskDto)
+        public async Task<ApiResponse<UserTask>> UpdateTaskAsync(Guid id, TaskDto taskDto)
         {
-
-            var task = await taskRepository.GetTaskByIdAsync(taskId);
+            var task = await taskRepository.GetTaskByIdAsync(id);
             if (task == null)
             {
-                return null;
+                throw new NotFoundException($"Task with ID {id} not found");
             }
+
             task.Title = taskDto.Title;
             task.Description = taskDto.Description;
-            task.Completed = taskDto.Completed;
             task.DueDate = taskDto.DueDate;
             task.Priority = taskDto.Priority;
             task.Labels = taskDto.Labels;
             task.UpdatedAt = DateTime.UtcNow;
-            task.Recurrence = taskDto.Recurrence;
-            task.Reminder = taskDto.Reminder;
-            task.SnoozedUntil = taskDto.SnoozedUntil;
 
-            await taskRepository.SaveChangesAsync();
-
-            return new TaskResponseDto
+            var success = await taskRepository.UpdateTaskAsync(task);
+            if (!success)
             {
-                Id = task.Id,
-                Title = task.Title,
-                Description = task.Description,
-                Completed = task.Completed,
-                DueDate = task.DueDate,
-                Priority = task.Priority,
-                Labels = task.Labels,
-                CreatedAt = task.CreatedAt,
-                UpdatedAt = DateTime.UtcNow,
-                CompletedAt = task.CompletedAt,
-                Recurrence = task.Recurrence,
-                Reminder = task.Reminder,
-                SnoozedUntil = task.SnoozedUntil
-            };
+                throw new AppException("Failed to update task");
+            }
+
+            return ApiResponse<UserTask>.SuccessResponse(task, "Task updated successfully");
         }
     }
 }

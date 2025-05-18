@@ -5,6 +5,5 @@
         public Boolean? IsAuthenticated { get; set; }
         public TokenResponseDto? Token { get; set; }
         public UserLoginDto? User { get; set; }
-        public string? Message { get; set; }
     }
 }

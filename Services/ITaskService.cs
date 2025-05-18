@@ -1,14 +1,15 @@
 ﻿using daytask.Dtos;
+using daytask.Models;
 
 namespace daytask.Services
 {
     public interface ITaskService
     {
-        Task<TaskResponseDto> CreateTaskAsync(TaskDto taskDto);
-        Task<TaskResponseDto> GetTaskByIdAsync(Guid taskId);
-        Task<IEnumerable<TaskResponseDto>> GetAllTasksAsync();
-        Task<IEnumerable<TaskResponseDto>> GetTasksByUserIdAsync(Guid userId);
-        Task<TaskResponseDto> UpdateTaskAsync(Guid taskId, TaskDto taskDto);
-        Task<bool> DeleteTaskAsync(Guid taskId);
-    }   
+        Task<ApiResponse<IEnumerable<UserTask>>> GetAllTasksAsync();
+        Task<ApiResponse<UserTask>> GetTaskByIdAsync(Guid id);
+        Task<ApiResponse<IEnumerable<UserTask>>> GetTasksByUserIdAsync(Guid userId);
+        Task<ApiResponse<UserTask>> CreateTaskAsync(TaskDto taskDto);
+        Task<ApiResponse<UserTask>> UpdateTaskAsync(Guid id, TaskDto taskDto);
+        Task<ApiResponse<bool>> DeleteTaskAsync(Guid id);
+    }
 }
