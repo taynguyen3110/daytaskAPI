@@ -30,6 +30,27 @@ namespace daytask.Services
             return ApiResponse<UserTask>.SuccessResponse(task, "Task created successfully");
         }
 
+        public async Task<ApiResponse<IEnumerable<UserTask>>> CreateTasksAsync(IEnumerable<TaskDto> tasks)
+        {
+            var userTasks = tasks.Select(taskDto => new UserTask
+            {
+                Title = taskDto.Title,
+                Description = taskDto.Description,
+                DueDate = taskDto.DueDate,
+                Priority = taskDto.Priority,
+                Labels = taskDto.Labels,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                UserId = taskDto.UserId
+            }).ToArray();
+            var success = await taskRepository.CreateTasksAsync(userTasks);
+            if (!success)
+            {
+                throw new AppException("Failed to create tasks");
+            }
+            return ApiResponse<IEnumerable<UserTask>>.SuccessResponse(userTasks, "Tasks created successfully");
+        }
+
         public async Task<ApiResponse<bool>> DeleteTaskAsync(Guid id)
         {
             var task = await taskRepository.GetTaskByIdAsync(id);

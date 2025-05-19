@@ -6,7 +6,6 @@ using daytask.Models;
 
 namespace daytask.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TaskController(ITaskService taskService) : ControllerBase
@@ -37,6 +36,14 @@ namespace daytask.Controllers
         {
             var response = await taskService.CreateTaskAsync(taskDto);
             return CreatedAtAction(nameof(GetTaskById), new { id = response.Data?.Id }, response);
+        }
+
+        [HttpPost("bulk")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<UserTask>>>> CreateTasks(IEnumerable<TaskDto> taskDtos)
+        {
+            var response = await taskService.CreateTasksAsync(taskDtos);
+            var taskDtoList = taskDtos.ToList();
+            return CreatedAtAction(nameof(GetTasksByUserId), new { id = taskDtoList[0].UserId }, response);
         }
 
         [HttpPut("{id}")]

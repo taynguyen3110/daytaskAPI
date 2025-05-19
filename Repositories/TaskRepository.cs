@@ -29,6 +29,12 @@ namespace daytask.Repositories
             return await SaveChangesAsync();
         }
 
+        public async Task<bool> CreateTasksAsync(IEnumerable<UserTask> tasks)
+        {
+            await dbContext.Tasks.AddRangeAsync(tasks);
+            return await SaveChangesAsync();
+        }
+
         public async Task<bool> UpdateTaskAsync(UserTask task)
         {
             dbContext.Tasks.Update(task);
