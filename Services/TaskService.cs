@@ -11,6 +11,7 @@ namespace daytask.Services
         {
             var task = new UserTask
             {
+                Id = taskDto.Id,
                 Title = taskDto.Title,
                 Description = taskDto.Description,
                 DueDate = taskDto.DueDate,
@@ -34,6 +35,7 @@ namespace daytask.Services
         {
             var userTasks = tasks.Select(taskDto => new UserTask
             {
+                Id = taskDto.Id,
                 Title = taskDto.Title,
                 Description = taskDto.Description,
                 DueDate = taskDto.DueDate,
