@@ -32,8 +32,17 @@ builder.Services.AddScoped<IValidator<UserDto>, UserDtoValidator>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+var connectionString = string.Empty;
+if (builder.Environment.IsDevelopment())
+{
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+} else
+{
+    connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddCors(options =>
 {
@@ -77,6 +86,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.MapGet("/", () => "DayTask APIs v2.1");
 
 app.UseHttpsRedirection();
 
