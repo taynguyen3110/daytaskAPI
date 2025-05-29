@@ -11,6 +11,9 @@ using daytask.Filters;
 using FluentValidation;
 using daytask.Middleware;
 using daytask.Dtos;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +26,28 @@ builder.Logging.AddDebug(); // Logs to the debug output window (useful in Visual
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidationFilter>();
+});
+
+// Add Rate Limit Based on Authenticated User ID
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("per-user", context =>
+    {
+        var userId = context.User?.Identity?.IsAuthenticated == true
+            ? context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous"
+            : "anonymous";
+
+        return RateLimitPartition.GetTokenBucketLimiter(userId, _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = 50,                   // max 10 requests
+            TokensPerPeriod = 5,               // refill 1 token
+            ReplenishmentPeriod = TimeSpan.FromSeconds(60), // every 6 seconds
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 5
+        });
+    });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
 // Register FluentValidation validators
@@ -87,7 +112,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.MapGet("/", () => "DayTask APIs v2.1");
+app.MapGet("/", () => "DayTask APIs v2.3");
 
 app.UseHttpsRedirection();
 
@@ -96,10 +121,12 @@ app.UseCors("AllowSpecificOrigins");
 // Add global exception handling middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-    //.RequireAuthorization();
+app.MapControllers()
+    .RequireAuthorization()
+    .RequireRateLimiting("per-user");
 
 app.Run();
