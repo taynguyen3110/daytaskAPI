@@ -7,6 +7,7 @@ namespace daytask.Repositories
         Task<UserTask?> GetTaskByIdAsync(Guid id);
         Task<IEnumerable<UserTask>> GetAllTasksAsync();
         Task<IEnumerable<UserTask>> GetTasksByUserIdAsync(Guid userId);
+        Task<bool> MergeTasksAsync(UserTask[] taskDtos);
         Task<bool> CreateTaskAsync(UserTask task);
         Task<bool> CreateTasksAsync(IEnumerable<UserTask> tasks);
         Task<bool> UpdateTaskAsync(UserTask task);

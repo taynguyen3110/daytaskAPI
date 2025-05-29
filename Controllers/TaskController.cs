@@ -32,22 +32,29 @@ namespace daytask.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<UserTask>>> CreateTask(TaskDto taskDto)
+        public async Task<ActionResult<ApiResponse<UserTask>>> CreateTask(CreateTaskDto taskDto)
         {
             var response = await taskService.CreateTaskAsync(taskDto);
             return CreatedAtAction(nameof(GetTaskById), new { id = response.Data?.Id }, response);
         }
 
         [HttpPost("bulk")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserTask>>>> CreateTasks(IEnumerable<TaskDto> taskDtos)
+        public async Task<ActionResult<ApiResponse<IEnumerable<UserTask>>>> CreateTasks(IEnumerable<CreateTaskDto> taskDtos)
         {
             var response = await taskService.CreateTasksAsync(taskDtos);
             var taskDtoList = taskDtos.ToList();
             return CreatedAtAction(nameof(GetTasksByUserId), new { id = taskDtoList[0].UserId }, response);
         }
 
+        [HttpPost("merge")]
+        public async Task<ActionResult<ApiResponse<bool>>> MergeTasks(UserTask[] tasks)
+        {
+            var response = await taskService.MergeTasksAsync(tasks);
+            return Ok(response);
+        }
+
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<UserTask>>> UpdateTask(Guid id, TaskDto taskDto)
+        public async Task<ActionResult<ApiResponse<UserTask>>> UpdateTask(Guid id, UpdateTaskDto taskDto)
         {
             var response = await taskService.UpdateTaskAsync(id, taskDto);
             return Ok(response);

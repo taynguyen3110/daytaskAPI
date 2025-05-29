@@ -7,7 +7,7 @@ namespace daytask.Services
 {
     public class TaskService (ITaskRepository taskRepository) : ITaskService
     {
-        public async Task<ApiResponse<UserTask>> CreateTaskAsync(TaskDto taskDto)
+        public async Task<ApiResponse<UserTask>> CreateTaskAsync(CreateTaskDto taskDto)
         {
             var task = new UserTask
             {
@@ -17,8 +17,10 @@ namespace daytask.Services
                 DueDate = taskDto.DueDate,
                 Priority = taskDto.Priority,
                 Labels = taskDto.Labels,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
+                CreatedAt = taskDto.CreatedAt,
+                UpdatedAt = taskDto.CreatedAt,
+                Recurrence = taskDto.Recurrence,
+                Reminder = taskDto.Reminder,
                 UserId = taskDto.UserId
             };
 
@@ -31,7 +33,7 @@ namespace daytask.Services
             return ApiResponse<UserTask>.SuccessResponse(task, "Task created successfully");
         }
 
-        public async Task<ApiResponse<IEnumerable<UserTask>>> CreateTasksAsync(IEnumerable<TaskDto> tasks)
+        public async Task<ApiResponse<IEnumerable<UserTask>>> CreateTasksAsync(IEnumerable<CreateTaskDto> tasks)
         {
             var userTasks = tasks.Select(taskDto => new UserTask
             {
@@ -41,33 +43,19 @@ namespace daytask.Services
                 DueDate = taskDto.DueDate,
                 Priority = taskDto.Priority,
                 Labels = taskDto.Labels,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
+                CreatedAt = taskDto.CreatedAt,
+                UpdatedAt = taskDto.CreatedAt,
+                Recurrence = taskDto.Recurrence,
+                Reminder = taskDto.Reminder,
                 UserId = taskDto.UserId
             }).ToArray();
+
             var success = await taskRepository.CreateTasksAsync(userTasks);
             if (!success)
             {
                 throw new AppException("Failed to create tasks");
             }
             return ApiResponse<IEnumerable<UserTask>>.SuccessResponse(userTasks, "Tasks created successfully");
-        }
-
-        public async Task<ApiResponse<bool>> DeleteTaskAsync(Guid id)
-        {
-            var task = await taskRepository.GetTaskByIdAsync(id);
-            if (task == null)
-            {
-                throw new NotFoundException($"Task with ID {id} not found");
-            }
-
-            var success = await taskRepository.RemoveTaskAsync(task);
-            if (!success)
-            {
-                throw new AppException("Failed to delete task");
-            }
-
-            return ApiResponse<bool>.SuccessResponse(true, "Task deleted successfully");
         }
 
         public async Task<ApiResponse<IEnumerable<UserTask>>> GetAllTasksAsync()
@@ -93,7 +81,7 @@ namespace daytask.Services
             return ApiResponse<IEnumerable<UserTask>>.SuccessResponse(tasks);
         }
 
-        public async Task<ApiResponse<UserTask>> UpdateTaskAsync(Guid id, TaskDto taskDto)
+        public async Task<ApiResponse<UserTask>> UpdateTaskAsync(Guid id, UpdateTaskDto taskDto)
         {
             var task = await taskRepository.GetTaskByIdAsync(id);
             if (task == null)
@@ -106,7 +94,7 @@ namespace daytask.Services
             task.DueDate = taskDto.DueDate;
             task.Priority = taskDto.Priority;
             task.Labels = taskDto.Labels;
-            task.UpdatedAt = DateTime.UtcNow;
+            task.UpdatedAt = taskDto.UpdatedAt;
 
             var success = await taskRepository.UpdateTaskAsync(task);
             if (!success)
@@ -115,6 +103,33 @@ namespace daytask.Services
             }
 
             return ApiResponse<UserTask>.SuccessResponse(task, "Task updated successfully");
+        }
+
+        public async Task<ApiResponse<bool>> MergeTasksAsync(UserTask[] tasks)
+        {
+            var result = await taskRepository.MergeTasksAsync(tasks);
+            if (!result)
+            {
+                throw new AppException("Failed to merge tasks");
+            }
+            return ApiResponse<bool>.SuccessResponse(true, "Tasks merged successfully");
+        }
+
+        public async Task<ApiResponse<bool>> DeleteTaskAsync(Guid id)
+        {
+            var task = await taskRepository.GetTaskByIdAsync(id);
+            if (task == null)
+            {
+                throw new NotFoundException($"Task with ID {id} not found");
+            }
+
+            var success = await taskRepository.RemoveTaskAsync(task);
+            if (!success)
+            {
+                throw new AppException("Failed to delete task");
+            }
+
+            return ApiResponse<bool>.SuccessResponse(true, "Task deleted successfully");
         }
     }
 }
