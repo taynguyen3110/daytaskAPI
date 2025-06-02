@@ -46,7 +46,6 @@ builder.Services.AddRateLimiter(options =>
             QueueLimit = 5
         });
     });
-
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
@@ -112,7 +111,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.MapGet("/", () => "DayTask APIs v2.3");
+app.MapGet("/", () => "DayTask APIs v2.4");
 
 app.UseHttpsRedirection();
 

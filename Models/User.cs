@@ -21,5 +21,6 @@ namespace daytask.Models
 
         public string? RefreshToken { get; set; }
         public DateTimeOffset? RefreshTokenExpiryTime { get; set; }
+        public string? ChatId { get; set; } = null;
     }
 }
