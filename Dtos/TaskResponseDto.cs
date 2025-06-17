@@ -13,7 +13,7 @@
         public DateTimeOffset UpdatedAt { get; set; } = DateTime.UtcNow;
         public DateTimeOffset CompletedAt { get; set; } = DateTime.UtcNow;
         public string Recurrence { get; set; } = string.Empty;
-        public DateTimeOffset Reminder { get; set; }
+        public DateTimeOffset? Reminder { get; set; }
         public string SnoozedUntil { get; set; } = string.Empty;
     }
 }

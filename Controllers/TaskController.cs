@@ -3,68 +3,70 @@ using Microsoft.AspNetCore.Mvc;
 using daytask.Services;
 using daytask.Dtos;
 using daytask.Models;
+using System.Security.Claims;
 
 namespace daytask.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TaskController(ITaskService taskService) : ControllerBase
+    public class TaskController(ITaskService taskService, ILogger<TaskController> logger) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserTask>>>> GetAllTasks()
+        public async Task<ApiResponse<IEnumerable<UserTask>>> GetAllTasks()
         {
             var response = await taskService.GetAllTasksAsync();
-            return Ok(response);
+            return response;
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<UserTask>>> GetTaskById(Guid id)
+        public async Task<ApiResponse<UserTask>> GetTaskById(Guid id)
         {
             var response = await taskService.GetTaskByIdAsync(id);
-            return Ok(response);
+            return response;
         }
 
         [HttpGet("user/{id}")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserTask>>>> GetTasksByUserId(Guid id)
+        public async Task<ApiResponse<IEnumerable<UserTask>>> GetTasksByUserId(Guid id)
         {
             var response = await taskService.GetTasksByUserIdAsync(id);
-            return Ok(response);
+            return response;
         }
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<UserTask>>> CreateTask(CreateTaskDto taskDto)
+        public async Task<ApiResponse<UserTask>> CreateTask(CreateTaskDto taskDto)
         {
-            var response = await taskService.CreateTaskAsync(taskDto);
-            return CreatedAtAction(nameof(GetTaskById), new { id = response.Data?.Id }, response);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var response = await taskService.CreateTaskAsync(taskDto, userId);
+            return response;
         }
 
         [HttpPost("bulk")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<UserTask>>>> CreateTasks(IEnumerable<CreateTaskDto> taskDtos)
+        public async Task<ApiResponse<IEnumerable<UserTask>>> CreateTasks(IEnumerable<CreateTaskDto> taskDtos)
         {
             var response = await taskService.CreateTasksAsync(taskDtos);
             var taskDtoList = taskDtos.ToList();
-            return CreatedAtAction(nameof(GetTasksByUserId), new { id = taskDtoList[0].UserId }, response);
+            return response;
         }
 
         [HttpPost("merge")]
-        public async Task<ActionResult<ApiResponse<bool>>> MergeTasks(UserTask[] tasks)
+        public async Task<ApiResponse<bool>> MergeTasks(UserTask[] tasks)
         {
             var response = await taskService.MergeTasksAsync(tasks);
-            return Ok(response);
+            return response;
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<UserTask>>> UpdateTask(Guid id, UpdateTaskDto taskDto)
+        public async Task<ApiResponse<UserTask>> UpdateTask(Guid id, UpdateTaskDto taskDto)
         {
             var response = await taskService.UpdateTaskAsync(id, taskDto);
-            return Ok(response);
+            return response;
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse<bool>>> DeleteTask(Guid id)
+        public async Task<ApiResponse<bool>> DeleteTask(Guid id)
         {
             var response = await taskService.DeleteTaskAsync(id);
-            return Ok(response);
+            return response;
         }
     }
 }

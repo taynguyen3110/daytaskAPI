@@ -11,10 +11,10 @@
         public string[] Labels { get; set; } = Array.Empty<string>();
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
-        public DateTimeOffset CompletedAt { get; set; }
-        public string Recurrence { get; set; } = string.Empty;
-        public DateTimeOffset Reminder { get; set; }
-        public string SnoozedUntil { get; set; } = string.Empty;
+        public DateTimeOffset? CompletedAt { get; set; }
+        public string? Recurrence { get; set; }
+        public DateTimeOffset? Reminder { get; set; }
+        public DateTimeOffset? SnoozedUntil { get; set; }
         public Guid UserId { get; set; }
     }
 }

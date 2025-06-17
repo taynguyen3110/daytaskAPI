@@ -1,19 +1,20 @@
+using daytask.Data;
+using daytask.Dtos;
+using daytask.Filters;
+using daytask.Middleware;
+using daytask.Options;
+using daytask.Repositories;
+using daytask.Services;
+using daytask.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Quartz;
 using Scalar.AspNetCore;
-using System.Text;
-using daytask.Data;
-using daytask.Services;
-using daytask.Repositories;
-using daytask.Validators;
-using daytask.Filters;
-using FluentValidation;
-using daytask.Middleware;
-using daytask.Dtos;
-using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,20 @@ builder.Services.AddControllers(options =>
 // Add Rate Limit Based on Authenticated User ID
 builder.Services.AddRateLimiter(options =>
 {
+    // Global limiter
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        return RateLimitPartition.GetTokenBucketLimiter("global", _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = 100, // Max 100 requests globally
+            TokensPerPeriod = 20, // Refill 20 tokens
+            ReplenishmentPeriod = TimeSpan.FromSeconds(60),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 50
+        });
+    });
+
+    // Per-user limiter
     options.AddPolicy("per-user", context =>
     {
         var userId = context.User?.Identity?.IsAuthenticated == true
@@ -39,7 +54,7 @@ builder.Services.AddRateLimiter(options =>
 
         return RateLimitPartition.GetTokenBucketLimiter(userId, _ => new TokenBucketRateLimiterOptions
         {
-            TokenLimit = 50,                   // max 10 requests
+            TokenLimit = 20,                   // max 10 requests
             TokensPerPeriod = 5,               // refill 1 token
             ReplenishmentPeriod = TimeSpan.FromSeconds(60), // every 6 seconds
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
@@ -66,7 +81,28 @@ if (builder.Environment.IsDevelopment())
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString)
+     .EnableSensitiveDataLogging());
+
+// Quartz configuration
+builder.Services.AddQuartz(q =>
+{
+    q.UsePersistentStore(options =>
+    {
+        options.UseProperties = true;
+        options.UseSqlServer(sql =>
+        {
+            sql.ConnectionString = connectionString;
+            sql.TablePrefix = "QRTZ_";
+        });
+        options.UseNewtonsoftJsonSerializer();
+    });
+});
+
+builder.Services.AddQuartzHostedService(opt =>
+{
+    opt.WaitForJobsToComplete = true;
+});
 
 builder.Services.AddCors(options =>
 {
@@ -95,12 +131,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<INoteService, NoteService>();
+builder.Services.AddScoped<ITelegramService, TelegramService>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
+
+// Register config binding
+builder.Services.Configure<TelegramBotOptions>(builder.Configuration.GetSection("TelegramBot"));
 
 var app = builder.Build();
 
@@ -121,11 +164,12 @@ app.UseCors("AllowSpecificOrigins");
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers()
-    .RequireAuthorization()
-    .RequireRateLimiting("per-user");
+app.MapControllers();
+    //.RequireAuthorization()
+    //.RequireRateLimiting("per-user");
 
 app.Run();

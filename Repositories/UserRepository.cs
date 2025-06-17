@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using daytask.Data;
+using daytask.Dtos;
 using daytask.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,11 @@ namespace daytask.Repositories
         public async Task<User?> GetUserByIdAsync(Guid userId)
         {
             return await context.Users.FindAsync(userId);
+        }
+
+        public async Task<string> GetChatIdByUserIdAsync (Guid userId)
+        {
+            return (await context.Users.FindAsync(userId))?.ChatId ?? string.Empty;
         }
 
         public async Task<bool> CheckUserExist(String email)
@@ -33,14 +39,14 @@ namespace daytask.Repositories
             return await SaveChangesAsync();
         }
 
-        public async Task<bool> AddChatId(Guid userId, string chatId)
+        public async Task<bool> AddChatId(AddChatIDRequestDto addChatIDRequestDto)
         {
-            var user = await context.Users.FindAsync(userId);
+            var user = await context.Users.FindAsync(addChatIDRequestDto.UserId);
             if (user == null)
             {
                 return false;
             }
-            user.ChatId = chatId;
+            user.ChatId = addChatIDRequestDto.ChatId;
             return await SaveChangesAsync();
         }
 

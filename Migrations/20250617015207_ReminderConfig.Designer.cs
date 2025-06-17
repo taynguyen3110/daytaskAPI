@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using daytask.Data;
 
@@ -11,9 +12,11 @@ using daytask.Data;
 namespace daytask.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250617015207_ReminderConfig")]
+    partial class ReminderConfig
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,7 +94,7 @@ namespace daytask.Migrations
                     b.Property<bool>("Completed")
                         .HasColumnType("bit");
 
-                    b.Property<DateTimeOffset?>("CompletedAt")
+                    b.Property<DateTimeOffset>("CompletedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -113,13 +116,15 @@ namespace daytask.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Recurrence")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset?>("Reminder")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTimeOffset?>("SnoozedUntil")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<string>("SnoozedUntil")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
