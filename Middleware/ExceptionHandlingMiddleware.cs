@@ -70,7 +70,7 @@ namespace daytask.Middleware
                 default:
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     _logger.LogError(exception, "An unhandled exception occurred");
-                    errorResponse.Message = "An unexpected error occurred.";
+                    errorResponse.Message = $"An unexpected error occurred: {exception.Message}";
                     break;
             }
 

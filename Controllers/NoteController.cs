@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Azure;
 using daytask.Dtos;
 using daytask.Models;
 using daytask.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace daytask.Controllers
 {
@@ -11,66 +12,38 @@ namespace daytask.Controllers
     public class NoteController(INoteService noteService) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<Note[]>> GetNotesByUserId (Guid userId)
+        public async Task<ApiResponse<IEnumerable<Note>>> GetNotesByUserId(Guid userId)
         {
-            var notes = await noteService.GetNotesByUserIdAsync(userId);
-            if (notes == null || !notes.Any())
-            {
-                return NotFound("No notes found for this user.");
-            }
-            return Ok(notes);
+            var response = await noteService.GetNotesByUserIdAsync(userId);
+            return response;
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Note>> GetNoteById(Guid id)
+        public async Task<ApiResponse<Note>> GetNoteById(Guid id)
         {
-            var note = await noteService.GetNoteByIdAsync(id);
-            if (note == null)
-            {
-                return NotFound("Note not found.");
-            }
-            return Ok(note);
+            var response = await noteService.GetNoteByIdAsync(id);
+            return response;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Note>> CreateNote([FromBody] NoteRequestDto note)
+        public async Task<ApiResponse<Note>> CreateNote([FromBody] NoteRequestDto note)
         {
-            if (note == null)
-            {
-                return BadRequest("Note data is null.");
-            }
-            var createdNote = await noteService.CreateNoteAsync(note);
-            if (createdNote == null)
-            {
-                return BadRequest("Failed to create note.");
-            }
-            return CreatedAtAction(nameof(GetNoteById), new { id = createdNote.Id }, createdNote);
+            var response = await noteService.CreateNoteAsync(note);
+            return response;
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Note>> UpdateNote(Guid id, [FromBody] NoteRequestDto note)
+        public async Task<ApiResponse<Note>> UpdateNote(Guid id, [FromBody] NoteRequestDto note)
         {
-            if (note == null)
-            {
-                return BadRequest("Note data is null.");
-            }
-            var updatedNote = await noteService.UpdateNoteAsync(id, note);
-            if (updatedNote == null)
-            {
-                return NotFound("Failed to update note.");
-            }
-            return Ok(updatedNote);
+            var response = await noteService.UpdateNoteAsync(id, note);
+            return response;
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Boolean>> DeleteNote(Guid id)
+        public async Task<ApiResponse<Boolean>> DeleteNote(Guid id)
         {
-            var result = await noteService.DeleteNoteAsync(id);
-            if (!result)
-            {
-                return NotFound("Note not found.");
-            }
-            return Ok(result);
+            var response = await noteService.DeleteNoteAsync(id);
+            return response;
         }
     }
 }

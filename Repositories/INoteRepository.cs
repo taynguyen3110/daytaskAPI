@@ -5,10 +5,11 @@ namespace daytask.Repositories
 {
     public interface INoteRepository
     {
-        Task CreateNoteAsync(Note note);
+        Task<bool> CreateNoteAsync(Note note);
         Task<Note?> GetNoteByIdAsync(Guid noteId);
         Task<IEnumerable<Note>> GetNotesByUserIdAsync(Guid userId);
-        void RemoveNote(Note note);
-        Task SaveChangesAsync();
+        Task<bool> UpdateNoteAsync(Note note);
+        Task<bool> RemoveNote(Note note);
+        Task<bool> SaveChangesAsync();
     }
 }

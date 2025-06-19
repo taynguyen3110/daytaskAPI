@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using daytask.Dtos;
 using daytask.Services;
+using daytask.Models;
 
 namespace daytask.Controllers
 {
@@ -11,34 +12,25 @@ namespace daytask.Controllers
     {
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult<RegisterResponseDto>> Register(RegisterRequestDto request)
+        public async Task<ApiResponse<RegisterResponseDto>> Register(RegisterRequestDto request)
         {
             var response = await authService.RegisterAsync(request);
-            if (!response.Success)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
+            return response;
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponseDto>> Login(UserDto request)
+        public async Task<ApiResponse<LoginResponseDto>> Login(UserDto request)
         {
            var result = await authService.LoginAsync(request);
-            if (result.StatusCode != 200)
-                return BadRequest(result);
-
-            return Ok(result);
+            return result;
         }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
+        public async Task<ApiResponse<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
         {
             var result = await authService.RefreshTokensAsync(request);
-            if (result is null || result.Data.AccessToken is null || result.Data.RefreshToken is null)
-                return Unauthorized("Invalid refresh token.");
-            return Ok(result);
+            return result;
         }
     }
 }

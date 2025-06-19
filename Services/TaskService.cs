@@ -2,6 +2,7 @@
 using daytask.Exceptions;
 using daytask.Models;
 using daytask.Repositories;
+using System.Threading.Tasks;
 
 namespace daytask.Services
 {
@@ -36,7 +37,6 @@ namespace daytask.Services
         public async Task<ApiResponse<IEnumerable<UserTask>>> CreateTasksAsync(IEnumerable<CreateTaskDto> tasks)
         {
             var chatId = await userRepository.GetChatIdByUserIdAsync(tasks.First().UserId);
-
             var userTasks = tasks.Select(taskDto => {
                 return new UserTask
                 {
@@ -68,6 +68,7 @@ namespace daytask.Services
         public async Task<ApiResponse<IEnumerable<UserTask>>> GetAllTasksAsync()
         {
             var tasks = await taskRepository.GetAllTasksAsync();
+            logger.LogInformation($"Tasks retrieved successfully");
             return ApiResponse<IEnumerable<UserTask>>.SuccessResponse(tasks);
         }
 
@@ -76,15 +77,16 @@ namespace daytask.Services
             var task = await taskRepository.GetTaskByIdAsync(id);
             if (task == null)
             {
-                throw new NotFoundException($"Task with ID {id} not found");
+                throw new NotFoundException($"Task with ID [{id}] not found");
             }
-
+            logger.LogInformation($"Task [{id}] retrieved successfully");
             return ApiResponse<UserTask>.SuccessResponse(task);
         }
 
         public async Task<ApiResponse<IEnumerable<UserTask>>> GetTasksByUserIdAsync(Guid userId)
         {
             var tasks = await taskRepository.GetTasksByUserIdAsync(userId);
+            logger.LogInformation($"Tasks for user [{userId}] retrieved successfully");
             return ApiResponse<IEnumerable<UserTask>>.SuccessResponse(tasks);
         }
 
@@ -93,7 +95,7 @@ namespace daytask.Services
             var task = await taskRepository.GetTaskByIdAsync(id);
             if (task == null)
             {
-                throw new NotFoundException($"Task with ID {id} not found");
+                throw new NotFoundException($"Task with ID [{id}] not found");
             }
 
             task.Title = taskDto.Title;
@@ -115,7 +117,7 @@ namespace daytask.Services
             }
 
             await reminderService.UpdateReminderAsync(task);
-            logger.LogInformation($"Task updated: {id}");
+            logger.LogInformation($"Task [{id}] updated");
             return ApiResponse<UserTask>.SuccessResponse(task, "Task updated successfully");
         }
 
@@ -160,11 +162,19 @@ namespace daytask.Services
             if (tasksToCreate.Count > 0)
             {
                 result = await taskRepository.CreateTasksAsync(tasksToCreate);
+                if (!result)
+                {
+                    logger.LogError("Failed to create new tasks during merge operation");
+                }
                 await reminderService.CreateRemindersAsync(tasksToCreate);
             } 
             else if (hasChange)
             {
                 result = await taskRepository.SaveChangesAsync();
+                if (!result)
+                {
+                    logger.LogError("Failed to update existing tasks during merge operation");
+                }
                 await reminderService.UpdateRemindersAsync(tasksToUpdate);
             } 
             else
@@ -184,7 +194,7 @@ namespace daytask.Services
             var task = await taskRepository.GetTaskByIdAsync(id);
             if (task == null)
             {
-                throw new NotFoundException($"Task with ID {id} not found");
+                throw new NotFoundException($"Task with ID [{id}] not found");
             }
 
             await reminderService.DeleteReminderAsync(id.ToString());
@@ -194,7 +204,7 @@ namespace daytask.Services
             {
                 throw new AppException("Failed to delete task");
             }
-            logger.LogInformation($"Tasks deleted {id}");
+            logger.LogInformation($"Tasks deleted [{id}]");
             return ApiResponse<bool>.SuccessResponse(true, "Task deleted successfully");
         }
     }

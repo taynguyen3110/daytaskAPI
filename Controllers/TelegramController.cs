@@ -11,17 +11,17 @@ namespace daytask.Controllers
     public class TelegramController(ITelegramService telegramService) : ControllerBase
     {
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<string>>> AddChatId([FromBody] AddChatIDRequestDto addChatIdRequestDto)
+        public async Task<ApiResponse<string>> AddChatId([FromBody] AddChatIDRequestDto addChatIdRequestDto)
         {
             var response = await telegramService.AddChatIdAsync(addChatIdRequestDto);
-            return Ok(response);
+            return response;
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse<string>>> RemoveChatId(Guid id)
+        public async Task<ApiResponse<string>> RemoveChatId(Guid id)
         {
             var response = await telegramService.RemoveChatIdAsync(id);
-            return Ok(response);
+            return response;
         }
 
         //[HttpPost("send-message")]

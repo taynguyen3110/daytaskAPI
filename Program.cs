@@ -14,6 +14,7 @@ using Quartz;
 using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +28,9 @@ builder.Logging.AddDebug(); // Logs to the debug output window (useful in Visual
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidationFilter>();
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
 // Add Rate Limit Based on Authenticated User ID
@@ -82,7 +86,9 @@ if (builder.Environment.IsDevelopment())
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString)
-     .EnableSensitiveDataLogging());
+     .EnableSensitiveDataLogging()
+        .LogTo(Console.WriteLine, LogLevel.Information)
+     );
 
 // Quartz configuration
 builder.Services.AddQuartz(q =>
@@ -154,7 +160,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.MapGet("/", () => "DayTask APIs v2.4");
+app.MapGet("/", () => "DayTask APIs v3.2");
 
 app.UseHttpsRedirection();
 
@@ -168,8 +174,8 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-    //.RequireAuthorization()
-    //.RequireRateLimiting("per-user");
+app.MapControllers()
+    .RequireAuthorization()
+    .RequireRateLimiting("per-user");
 
 app.Run();
