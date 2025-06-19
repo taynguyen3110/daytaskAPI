@@ -71,6 +71,7 @@ namespace daytask.Middleware
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     _logger.LogError(exception, "An unhandled exception occurred");
                     errorResponse.Message = $"An unexpected error occurred: {exception.Message}";
+                    errorResponse.Data = exception;
                     break;
             }
 

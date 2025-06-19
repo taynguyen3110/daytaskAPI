@@ -160,7 +160,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.MapGet("/", () => "DayTask APIs v3.2");
+app.MapGet("/", () => "DayTask APIs v3.22");
 
 app.UseHttpsRedirection();
 

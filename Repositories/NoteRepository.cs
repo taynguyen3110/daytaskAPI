@@ -18,10 +18,23 @@ namespace daytask.Repositories
             return await SaveChangesAsync();
         }
 
+        public async Task<bool> CreateNotesAsync(IEnumerable<Note> notes)
+        {
+            await dbContext.Notes.AddRangeAsync(notes);
+            return await SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<Note>> GetNotesByUserIdAsync(Guid userId)
         {
             return await dbContext.Notes
                 .Where(n => n.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Note>> GetExistingNotesByIdsAsync(IEnumerable<Guid> noteIds)
+        {
+            return await dbContext.Notes
+                .Where(n => noteIds.Contains(n.Id))
                 .ToListAsync();
         }
 

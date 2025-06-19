@@ -11,7 +11,7 @@ namespace daytask.Controllers
     [ApiController]
     public class NoteController(INoteService noteService) : ControllerBase
     {
-        [HttpGet]
+        [HttpGet("user/{userId}")]
         public async Task<ApiResponse<IEnumerable<Note>>> GetNotesByUserId(Guid userId)
         {
             var response = await noteService.GetNotesByUserIdAsync(userId);
@@ -26,7 +26,7 @@ namespace daytask.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<Note>> CreateNote([FromBody] NoteRequestDto note)
+        public async Task<ApiResponse<Note>> CreateNote([FromBody] Note note)
         {
             var response = await noteService.CreateNoteAsync(note);
             return response;
@@ -36,6 +36,13 @@ namespace daytask.Controllers
         public async Task<ApiResponse<Note>> UpdateNote(Guid id, [FromBody] NoteRequestDto note)
         {
             var response = await noteService.UpdateNoteAsync(id, note);
+            return response;
+        }
+
+        [HttpPost("merge")]
+        public async Task<ApiResponse<bool>> MergeNotes(Note[] notes)
+        {
+            var response = await noteService.MergeNotesAsync(notes);
             return response;
         }
 

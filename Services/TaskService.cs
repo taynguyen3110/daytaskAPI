@@ -185,7 +185,7 @@ namespace daytask.Services
             {
                 throw new AppException("Failed to merge tasks");
             }
-            logger.LogInformation($"Tasks merged successfully, tasks created: {string.Join(" ,", tasksToCreate.Select(t => t.Id))}. Tasks updated: {string.Join(" ,", tasksToCreate.Select(t => t.Id))} ");
+            logger.LogInformation($"Tasks merged successfully, tasks created: {string.Join(" ,", tasksToCreate.Select(t => t.Id))}. Tasks updated: {string.Join(" ,", tasksToUpdate.Select(t => t.Id))} ");
             return ApiResponse<bool>.SuccessResponse(true, "Tasks merged successfully");
         }
 
