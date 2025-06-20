@@ -9,6 +9,11 @@ namespace daytask.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = false
+        };
 
         public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
@@ -32,7 +37,7 @@ namespace daytask.Middleware
         {
             var response = context.Response;
             response.ContentType = "application/json";
-            
+
             var errorResponse = new ApiResponse<object>
             {
                 Success = false,
@@ -62,7 +67,7 @@ namespace daytask.Middleware
                     errorResponse.Message = exception.Message;
                     break;
 
-                 case AppException appException:
+                case AppException appException:
                     response.StatusCode = appException.StatusCode;
                     errorResponse.Message = appException.Message;
                     break;
@@ -74,8 +79,7 @@ namespace daytask.Middleware
                     errorResponse.Data = exception;
                     break;
             }
-
-            var result = JsonSerializer.Serialize(errorResponse);
+            var result = JsonSerializer.Serialize(errorResponse, _jsonSerializerOptions);
             await response.WriteAsync(result);
         }
     }

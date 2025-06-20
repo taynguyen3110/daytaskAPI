@@ -49,7 +49,8 @@ namespace daytask.Services
             {
                 IsAuthenticated = true,
                 Token = token,
-                User = loggedInUser
+                User = loggedInUser,
+                ChatId = user.ChatId?.ToString() ?? null
             };
 
             return ApiResponse<LoginResponseDto>.SuccessResponse(response, "Login successful");

@@ -56,7 +56,7 @@ namespace daytask.Services
             }
             catch (Exception ex)
             {
-                throw new AppException("Failed to create reminder");
+                throw new AppException($"Failed to create reminder: {ex.Message}");
             }
         }
         public async Task CreateRemindersAsync(IEnumerable<UserTask> tasks)
@@ -96,15 +96,24 @@ namespace daytask.Services
             try
             {
                 var scheduler = await schedulerFactory.GetScheduler();
-                var reminderJobKey = new JobKey($"reminder_{taskId}");
-                var dueJobKey = new JobKey($"reminder_due_{taskId}");
+                var reminderJobKey = new JobKey($"reminder_{taskId.ToLowerInvariant()}", "Reminder");
+                var dueJobKey = new JobKey($"reminder_due_{taskId.ToLowerInvariant()}", "Due_Reminder");
 
-                await scheduler.DeleteJob(reminderJobKey);
-                await scheduler.DeleteJob(dueJobKey);
+                var resultReminder = await scheduler.DeleteJob(reminderJobKey);
+                var resultDue = await scheduler.DeleteJob(dueJobKey);
+                if (resultDue == false && resultReminder == false)
+                {
+                    throw new NotFoundException($"Reminder [reminder_{taskId.ToLowerInvariant()}] not found");
+                }
                 logger.LogInformation($"Reminder of task: {taskId} deleted");
             }
             catch (Exception ex)
             {
+                if (ex is NotFoundException)
+                {
+                    throw;
+                }
+               
                 throw new AppException("Failed to delete reminder");
             }
         }
@@ -127,22 +136,25 @@ namespace daytask.Services
 
             ITrigger trigger;
 
-            if (reminder.Recurrence is not null)
+            if (!string.IsNullOrEmpty(reminder.Recurrence))
             {
                 var cronExpression = reminder.Recurrence switch
                 {
                     "daily" => $"0 {minute} {hour} * * ?",
-                    "weekly" => $"0 {minute} {hour} ? * {dayOfWeek.ToString().ToUpper()}",
+                    "weekly" => $"0 {minute} {hour} ? * {dayOfWeek.ToString().Substring(0, 3).ToUpper()}",
                     "monthly" => $"0 {minute} {hour} {dayOfMonth} * ?",
                     _ => null // No recurrence or invalid recurrence
                 };
-
+                if (cronExpression is null)
+                {
+                    throw new AppException("Invalid recurrence pattern specified.");
+                }
                 trigger = TriggerBuilder.Create()
                 .WithIdentity(new TriggerKey($"trigger_{reminder.TaskId}", reminder.ReminderGroup))
-                .WithCronSchedule(cronExpression!)
+                .WithCronSchedule(cronExpression, x => x.InTimeZone(TimeZoneInfo.Utc))
                 .ForJob(job)
                 .Build();
-                logger.LogInformation($"Scheduling {reminder.Recurrence} reminder");
+                logger.LogInformation($"Scheduling {reminder.Recurrence} reminder at ");
             }
             else
             {

@@ -10,6 +10,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Serialization;
 using Quartz;
 using Scalar.AspNetCore;
 using System.Security.Claims;
@@ -28,9 +29,9 @@ builder.Logging.AddDebug(); // Logs to the debug output window (useful in Visual
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidationFilter>();
-}).AddJsonOptions(options =>
+}).AddNewtonsoftJson(options =>
 {
-    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 });
 
 // Add Rate Limit Based on Authenticated User ID
@@ -101,7 +102,7 @@ builder.Services.AddQuartz(q =>
             sql.ConnectionString = connectionString;
             sql.TablePrefix = "QRTZ_";
         });
-        options.UseNewtonsoftJsonSerializer();
+        options.UseBinarySerializer();
     });
 });
 

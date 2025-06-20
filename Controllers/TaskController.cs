@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using daytask.Services;
-using daytask.Dtos;
+﻿using daytask.Dtos;
 using daytask.Models;
+using daytask.Services;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace daytask.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TaskController(ITaskService taskService, ILogger<TaskController> logger) : ControllerBase
+    public class TaskController(ITaskService taskService) : ControllerBase
     {
         [HttpGet]
         public async Task<ApiResponse<IEnumerable<UserTask>>> GetAllTasks()

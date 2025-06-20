@@ -97,6 +97,7 @@ namespace daytask.Services
             {
                 throw new NotFoundException($"Task with ID [{id}] not found");
             }
+            var scheduleChanged = taskDto.DueDate != task.DueDate || taskDto.Reminder != task.Reminder;
 
             task.Title = taskDto.Title;
             task.Description = taskDto.Description;
@@ -116,7 +117,11 @@ namespace daytask.Services
                 throw new AppException("Failed to update task");
             }
 
-            await reminderService.UpdateReminderAsync(task);
+            if (scheduleChanged)
+            {
+                // If the schedule has changed, update the reminder
+                await reminderService.UpdateReminderAsync(task);
+            }
             logger.LogInformation($"Task [{id}] updated");
             return ApiResponse<UserTask>.SuccessResponse(task, "Task updated successfully");
         }
